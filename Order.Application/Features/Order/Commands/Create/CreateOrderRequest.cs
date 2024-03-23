@@ -4,10 +4,10 @@ namespace Order.Application.Features.Order.Commands.Create
 {
     public class OrderCreateDto
     {
-        public string BuyerId { get; set; }
-        public List<OrderItemDto> orderItems { get; set; }
-        public PaymentDto payment { get; set; }
-        public AddressDto Address { get; set; }
+        public string CustomerId { get; set; }
+        public List<OrderItemDto> OrderItems { get; set; }
+        public PaymentDto OrderPayment { get; set; }
+        public AddressDto OrderAddress { get; set; }
     }
 
     public class OrderItemDto
@@ -21,8 +21,6 @@ namespace Order.Application.Features.Order.Commands.Create
     {
         public string CardName { get; set; }
         public string CardNumber { get; set; }
-        public string Expiration { get; set; }
-        public string CVV { get; set; }
     }
 
     public class AddressDto
