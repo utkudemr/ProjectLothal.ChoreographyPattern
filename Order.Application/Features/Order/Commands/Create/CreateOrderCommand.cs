@@ -28,51 +28,63 @@ public class CreateOrderCommand : IRequest<bool>
         {
             try
             {
-                var newOrder = new OrderHeader
-                {
-                    BuyerId = request.Order.CustomerId,
-                    Status = OrderStatus.Suspend,
-                    Line = request.Order.OrderAddress.Line,
-                    Province = request.Order.OrderAddress.Province,
-                    District = request.Order.OrderAddress.District,
-                    CreatedDate = DateTime.Now,
-                    ErrorMessage = string.Empty
-                };
+                var newOrder = TransformCreateOrder(request);
 
-                newOrder.Items.ToList().ForEach(item =>
-                {
-                    newOrder.Items.Add(new OrderItem { Price = item.Price, ProductId = item.ProductId, Count = item.Count });
-                });
-
-                await _context.AddAsync(newOrder);
+                await _context.AddAsync(newOrder, cancellationToken);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
-                var orderCreatedEvent = new OrderCreatedEvent()
-                {
-                    BuyerId = request.Order.CustomerId,
-                    OrderId = newOrder.Id,
-                    Payment = new PaymentMessage
-                    {
-                        CardName = request.Order.OrderPayment.CardName,
-                        CardNumber = request.Order.OrderPayment.CardNumber,
-                        TotalPrice = request.Order.OrderItems.Sum(x => x.Price * x.Count)
-                    },
-                };
+                var orderCreatedEvent = CreateOrderEvent(request, newOrder);
 
-                request.Order.OrderItems.ForEach(item =>
-                {
-                    orderCreatedEvent.orderItems.Add(new OrderItemMessage { Count = item.Count, ProductId = item.ProductId });
-                });
+                await _publishEndpoint.Publish(orderCreatedEvent, cancellationToken);
 
-                await _publishEndpoint.Publish(orderCreatedEvent);
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }
+        }
 
-            return false;
+        private static OrderCreatedEvent CreateOrderEvent(CreateOrderCommand request, OrderHeader newOrder)
+        {
+            var orderCreatedEvent = new OrderCreatedEvent()
+            {
+                BuyerId = request.Order.CustomerId,
+                OrderId = newOrder.Id,
+                Payment = new PaymentMessage
+                {
+                    CardName = request.Order.OrderPayment.CardName,
+                    CardNumber = request.Order.OrderPayment.CardNumber,
+                    TotalPrice = request.Order.OrderItems.Sum(x => x.Price * x.Count)
+                },
+            };
+
+            request.Order.OrderItems.ForEach(item =>
+            {
+                orderCreatedEvent.orderItems.Add(new OrderItemMessage { Count = item.Count, ProductId = item.ProductId });
+            });
+            return orderCreatedEvent;
+        }
+
+        private static OrderHeader TransformCreateOrder(CreateOrderCommand request)
+        {
+            var newOrder = new OrderHeader
+            {
+                BuyerId = request.Order.CustomerId,
+                Status = OrderStatus.Suspend,
+                Line = request.Order.OrderAddress.Line,
+                Province = request.Order.OrderAddress.Province,
+                District = request.Order.OrderAddress.District,
+                CreatedDate = DateTime.Now,
+                ErrorMessage = string.Empty
+            };
+
+            newOrder.Items.ToList().ForEach(item =>
+            {
+                newOrder.Items.Add(new OrderItem { Price = item.Price, ProductId = item.ProductId, Count = item.Count });
+            });
+            return newOrder;
         }
     }
 }

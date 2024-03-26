@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Order\Rules\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Order.Domain\Order.Domain.csproj" />
     <ProjectReference Include="..\Order.Persistance\Order.Persistance.csproj" />
     <ProjectReference Include="..\Order.Shared\Order.Shared.csproj" />
