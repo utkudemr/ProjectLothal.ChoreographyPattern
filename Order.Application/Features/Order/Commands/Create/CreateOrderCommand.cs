@@ -62,7 +62,7 @@ public class CreateOrderCommand : IRequest<bool>
 
             request.Order.OrderItems.ForEach(item =>
             {
-                orderCreatedEvent.orderItems.Add(new OrderItemMessage { Count = item.Count, ProductId = item.ProductId });
+                orderCreatedEvent.OrderItems.Add(new OrderItemMessage { Count = item.Count, ProductId = item.ProductId });
             });
             return orderCreatedEvent;
         }

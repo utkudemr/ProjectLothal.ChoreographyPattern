@@ -30,7 +30,7 @@ namespace Stock.API.Consumers
             bool hasStockError = false;
             try
             {
-                foreach (var item in context.Message.orderItems)
+                foreach (var item in context.Message.OrderItems)
                 {
                     var stock = await _context.Stocks.FirstOrDefaultAsync(x => x.ProductId == item.ProductId && x.Count > item.Count);
 
@@ -48,7 +48,7 @@ namespace Stock.API.Consumers
                         Payment = context.Message.Payment,
                         BuyerId = context.Message.BuyerId,
                         OrderId = context.Message.OrderId,
-                        OrderItems = context.Message.orderItems
+                        OrderItems = context.Message.OrderItems
                     });
 
                 }

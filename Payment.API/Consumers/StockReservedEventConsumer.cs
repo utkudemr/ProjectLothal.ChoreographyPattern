@@ -19,15 +19,15 @@ namespace Payment.API.Consumers
         {
             if (PaymentBalance > context.Message.Payment.TotalPrice)
             {
-                await _publishEndpoint.Publish(new PaymentCompletedEvent { BuyerId = context.Message.BuyerId, orderId = context.Message.OrderId });
+                await _publishEndpoint.Publish(new PaymentCompletedEvent { BuyerId = context.Message.BuyerId, OrderId = context.Message.OrderId });
             }
             else
             {
                 var failedEvent = new PaymentFailedEvent { 
                     BuyerId = context.Message.BuyerId,
-                    orderId = context.Message.OrderId, 
+                    OrderId = context.Message.OrderId, 
                     Message = "not enough balance",
-                    orderItems = context.Message.OrderItems
+                    OrderItems = context.Message.OrderItems
                 };
                 await _publishEndpoint.Publish(failedEvent);
             }
