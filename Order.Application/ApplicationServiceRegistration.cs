@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
+using Order.Application.Consumers;
+using Order.Shared;
 
 namespace Order.Application
 {
@@ -16,10 +18,17 @@ namespace Order.Application
 
             services.AddMassTransit(x =>
             {
+                x.AddConsumer<StockNotReservedEventConsumer>();
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host("localhost", "/", c => { });
+
+                    cfg.ReceiveEndpoint(QueueConst.OrderStockNotReservedEventQueueName, e =>
+                    {
+                        e.ConfigureConsumer<StockNotReservedEventConsumer>(context);
+                    });
                 });
+
             });
 
             return services;
