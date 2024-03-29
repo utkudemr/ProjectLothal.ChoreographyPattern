@@ -18,7 +18,10 @@ namespace Order.Application
 
             services.AddMassTransit(x =>
             {
+                x.AddConsumer<PaymentFailedConsumer>();
                 x.AddConsumer<StockNotReservedEventConsumer>();
+                x.AddConsumer<PaymentCompletedEventConsumer>();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host("localhost", "/", c => { });
@@ -27,6 +30,17 @@ namespace Order.Application
                     {
                         e.ConfigureConsumer<StockNotReservedEventConsumer>(context);
                     });
+
+                    cfg.ReceiveEndpoint(QueueConst.OrderPaymentFailedEventQueueName, e =>
+                    {
+                        e.ConfigureConsumer<PaymentFailedConsumer>(context);
+                    });
+
+                    cfg.ReceiveEndpoint(QueueConst.OrderPaymentCompletedEventQueueName, e =>
+                    {
+                        e.ConfigureConsumer<PaymentCompletedEventConsumer>(context);
+                    });
+
                 });
 
             });
